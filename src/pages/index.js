@@ -1,43 +1,37 @@
-import Link from "next/link";
+import Link from 'next/link';
+import SearchBar from '../components/SearchBar';
 
 export default function Home() {
   return (
-    <div className="p-10 min-h-screen bg-gray-400 flex flex-col justify-center items-center">
-      <h1 className="text-4xl font-bold mb-8 text-blue-600">
-        Witaj w Wyszukiwarce Studiów
-      </h1>
-      <nav className="bg-white shadow-md rounded-lg p-6 w-full max-w-md">
-        <ul className="space-y-4">
+    <div className="min-h-screen bg-gray-100">
+      <nav className="bg-white shadow-md p-4">
+        <ul className="flex space-x-4">
           <li>
             <Link href="/search/1">
-              <div className="block p-4 bg-blue-500 text-white rounded-lg text-center hover:bg-blue-600 transition duration-300 cursor-pointer">
-                Wyszukiwarka Kierunków
-              </div>
+              <div className="text-blue-500 hover:underline cursor-pointer">Wyszukiwarka Kierunków</div>
             </Link>
           </li>
           <li>
             <Link href="/quiz">
-              <div className="block p-4 bg-green-500 text-white rounded-lg text-center hover:bg-green-600 transition duration-300 cursor-pointer">
-                Quiz Preferencji
-              </div>
+              <div className="text-green-500 hover:underline cursor-pointer">Quiz Preferencji</div>
             </Link>
           </li>
           <li>
             <Link href="/wheel">
-              <div className="block p-4 bg-purple-500 text-white rounded-lg text-center hover:bg-purple-600 transition duration-300 cursor-pointer">
-                Koło Fortuny
-              </div>
+              <div className="text-purple-500 hover:underline cursor-pointer">Koło Fortuny</div>
             </Link>
           </li>
           <li>
             <Link href="/reviews">
-              <div className="block p-4 bg-yellow-500 text-white rounded-lg text-center hover:bg-yellow-600 transition duration-300 cursor-pointer">
-                Opinie
-              </div>
+              <div className="text-yellow-500 hover:underline cursor-pointer">Opinie</div>
             </Link>
           </li>
         </ul>
       </nav>
+      <div className="p-10 flex flex-col justify-center items-center">
+        <h1 className="text-4xl font-bold mb-8 text-blue-600">Wyszukiwarka Kierunków</h1>
+        <SearchBar />
+      </div>
     </div>
   );
 }
