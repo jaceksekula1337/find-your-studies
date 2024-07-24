@@ -1,18 +1,13 @@
-import Head from "next/head";
 import { React } from "react";
 import "../styles/globals.css";
+import Layout from "../components/Layout";
 
-const MyApp = ({ Component, pageProps }) => {
+function MyApp({ Component, pageProps }) {
   return (
-    <div className="bg-dark-blue">
-      <Head>
-        <title>Next.js</title>
-        <link rel="icon" href="/favicon.png" />
-      </Head>
-
+    <Layout>
       <Component {...pageProps} />
-    </div>
+    </Layout>
   );
-};
+}
 
 export default MyApp;
