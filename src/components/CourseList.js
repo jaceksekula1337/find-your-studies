@@ -9,6 +9,11 @@ export default function CourseList({ courses }) {
             flex flex-col"
         >
           <div className="relative overflow-hidden rounded-t-xl h-48">
+            <image
+              src="https://via.placeholder.com/400"
+              alt={course.courseName}
+              className="w-full h-full object-cover"
+            />
             <div className="transition-opacity duration-300 ease-in-out absolute h-full w-full bg-blue-700 opacity-0 hover:opacity-60" />
           </div>
           <div className="p-4">

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export default function useCourses() {
+const useCourses = () => {
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,24 +26,28 @@ export default function useCourses() {
     let updatedCourses = courses;
 
     if (query) {
-      updatedCourses = updatedCourses.filter(course =>
+      updatedCourses = updatedCourses.filter((course) =>
         course.courseName.toLowerCase().includes(query.toLowerCase())
       );
     }
 
-    // Apply additional filters (e.g., by institution, city, etc.)
-    if (filters) {
-      if (filters.institution) {
-        updatedCourses = updatedCourses.filter(course =>
-          course.leadingInstitutionName.toLowerCase().includes(filters.institution.toLowerCase())
-        );
-      }
-
-      // Add more filter conditions here
+    if (filters.institution) {
+      updatedCourses = updatedCourses.filter((course) =>
+        course.leadingInstitutionName
+          .toLowerCase()
+          .includes(filters.institution.toLowerCase())
+      );
     }
 
     setFilteredCourses(updatedCourses);
   };
 
-  return { filteredCourses, loading, filterCourses };
-}
+  return {
+    courses,
+    filteredCourses,
+    loading,
+    filterCourses,
+  };
+};
+
+export default useCourses;
