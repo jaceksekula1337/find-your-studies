@@ -19,7 +19,7 @@ export default function Home() {
 
   return (
     <div className="p-10 min-h-screen  flex flex-col items-center  w-full">
-      <h1 className="text-5xl font-bold mb-8 text-center">
+      <h1 className="text-5xl mb-8 text-center">
         Wyszukaj kierunek studiów, <br></br>zobacz czy do niego pasujesz albo{" "}
         <br></br>
         sprawdź co zaproponuje ci LOS.
