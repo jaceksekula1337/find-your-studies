@@ -1,16 +1,18 @@
+import Image from "next/image";
+
 export default function CourseList({ courses }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
       {courses.map((course) => (
         <div
           key={course.courseUuid}
-          className="transition-all duration-300 relative overflow-hidden
-            bg-white rounded-xl shadow-md hover:shadow-xl cursor-pointer
-            flex flex-col"
+          className="transition-all duration-300 relative overflow-hidden bg-white rounded-xl shadow-md hover:shadow-xl cursor-pointer flex flex-col"
         >
           <div className="relative overflow-hidden rounded-t-xl h-48">
-            <image
-              src="https://via.placeholder.com/400"
+            <Image
+              src="/studia.jpg"
+              width={400}
+              height={400}
               alt={course.courseName}
               className="w-full h-full object-cover"
             />
