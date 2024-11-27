@@ -52,6 +52,40 @@ export default function Quiz() {
     type: "",
   });
 
+  const fetchQuizResults = async () => {
+    const answers = {
+      interest: formValues.interest,
+      studyMode: formValues.studyMode,
+      type: formValues.type,
+      questions: questions.map((question) => ({
+        id: question.id,
+        answer: formValues[`question${question.id}`] || "Nie odpowiedziano",
+      })),
+    };
+
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:8000/matching/course-recommendations/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(answers),
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Dopasowania:", data);
+      } else {
+        console.error("Błąd w odpowiedzi z serwera:", response.status);
+      }
+    } catch (error) {
+      console.error("Błąd podczas wysyłania danych:", error);
+    }
+  };
+
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
@@ -152,8 +186,11 @@ export default function Quiz() {
         onPageChange={handlePageChange}
       />
       <div className="mt-8 text-center">
-        <button className="bg-green-600 text-white py-2 px-4 rounded">
-          Zobacz dopasowania [102]
+        <button
+          className="bg-green-600 text-white py-2 px-4 rounded"
+          onClick={fetchQuizResults}
+        >
+          Zobacz dopasowania
         </button>
         <p className="mt-2 text-sm text-gray-500">
           Odpowiedz na więcej pytań, żeby dostać bardziej szczegółowe
