@@ -1,94 +1,154 @@
 import { useState } from "react";
 import Pagination from "../components/Pagination";
-import FormInput from "../components/FormInput"; // Importujemy komponent FormInput
+import FormInput from "../components/FormInput";
 
 const questions = [
+  // OPENNESS
   {
     id: 1,
-    question: "Czy lubisz pracować z ludźmi?",
-    answers: ["Bardzo lubię", "Jest mi to obojętne", "Nie lubię"],
+    identifier: "O_try_new_things",
+    question: "Lubię próbować nowych rzeczy.",
+    category: "openness",
+    answers: ["Zdecydowanie tak", "Czasami", "Raczej nie"],
   },
   {
     id: 2,
-    question: "Jak czujesz się podczas wystąpień publicznych?",
-    answers: [
-      "Bardzo dobrze, sprawia mi to przyjemność",
-      "Nie jestem pewien/pewna, mam mieszane uczucia",
-      "Zdecydowanie tego nie lubię, unikam za wszelką cenę",
-    ],
+    identifier: "O_art_culture",
+    question: "Interesuję się sztuką i kulturą.",
+    category: "openness",
+    answers: ["Bardzo", "Trochę", "Wcale"],
   },
   {
     id: 3,
-    question: "Czy uważasz się za osobę empatyczną?",
-    answers: ["Zdecydowanie tak", "W pewnym stopniu", "Zdecydowanie nie"],
+    identifier: "O_creative_thinking",
+    question: "Lubię myśleć w nieszablonowy sposób.",
+    category: "openness",
+    answers: ["Tak", "Nie zawsze", "Raczej nie"],
   },
+
+  // CONSCIENTIOUSNESS
   {
     id: 4,
-    question:
-      "Jak ważne jest dla Ciebie pomaganie innym ludziom w Twojej przyszłej pracy?",
-    answers: [
-      "Bardzo ważne, chciałbym/chciałabym, aby to był główny aspekt mojej pracy",
-      "Nie ma to dla mnie większego znaczenia",
-      "Nie ma to dla mnie większego znaczenia",
-    ],
+    identifier: "C_task_completion",
+    question: "Zawsze kończę rozpoczęte zadania.",
+    category: "conscientiousness",
+    answers: ["Zdecydowanie tak", "Czasem", "Raczej nie"],
   },
   {
     id: 5,
-    question: "Jak radzisz sobie z rozwiązywaniem problemów pod presją czasu?",
-    answers: [
-      "Bardzo dobrze, dobrze sobie radzę pod presją",
-      "Średnio, czasem się stresuję",
-      "Bardzo słabo, unikam takich sytuacji",
-    ],
+    identifier: "C_organized",
+    question: "Jestem dobrze zorganizowany/a.",
+    category: "conscientiousness",
+    answers: ["Zdecydowanie", "Trochę", "Nie bardzo"],
+  },
+  {
+    id: 6,
+    identifier: "C_time_management",
+    question: "Potrafię zarządzać swoim czasem efektywnie.",
+    category: "conscientiousness",
+    answers: ["Tak", "Zależy od dnia", "Raczej nie"],
+  },
+
+  // EXTRAVERSION
+  {
+    id: 7,
+    identifier: "E_attention_seeker",
+    question: "Lubię być w centrum uwagi.",
+    category: "extraversion",
+    answers: ["Zdecydowanie tak", "Czasami", "Unikam tego"],
+  },
+  {
+    id: 8,
+    identifier: "E_social_energy",
+    question: "Czerpię energię z kontaktów z ludźmi.",
+    category: "extraversion",
+    answers: ["Tak", "Zależy", "Nie"],
+  },
+  {
+    id: 9,
+    identifier: "E_teamwork",
+    question: "Lubię pracę zespołową.",
+    category: "extraversion",
+    answers: ["Bardzo", "Może być", "Wolę pracować sam/a"],
+  },
+
+  // AGREEABLENESS
+  {
+    id: 10,
+    identifier: "A_helping_others",
+    question: "Pomaganie innym sprawia mi radość.",
+    category: "agreeableness",
+    answers: ["Tak", "Czasem", "Nie bardzo"],
+  },
+  {
+    id: 11,
+    identifier: "A_easy_connecting",
+    question: "Łatwo nawiązuję kontakt z innymi ludźmi.",
+    category: "agreeableness",
+    answers: ["Zdecydowanie tak", "Zależy", "Raczej nie"],
+  },
+  {
+    id: 12,
+    identifier: "A_forgiving",
+    question: "Jestem wyrozumiały/a wobec błędów innych.",
+    category: "agreeableness",
+    answers: ["Bardzo", "Średnio", "Nie"],
+  },
+
+  // NEUROTICISM
+  {
+    id: 13,
+    identifier: "N_stress_prone",
+    question: "Często się stresuję.",
+    category: "neuroticism",
+    answers: ["Tak", "Rzadko", "Prawie nigdy"],
+  },
+  {
+    id: 14,
+    identifier: "N_unwarranted_worry",
+    question: "Zdarza mi się martwić bez powodu.",
+    category: "neuroticism",
+    answers: ["Często", "Czasem", "Nigdy"],
+  },
+  {
+    id: 15,
+    identifier: "N_low_resilience",
+    question: "Mam problemy z utrzymaniem spokoju w trudnych sytuacjach.",
+    category: "neuroticism",
+    answers: ["Tak", "Zależy", "Nie"],
   },
 ];
+
+// Miksujemy po kategoriach
+const organizeQuestionsAlternating = (questions) => {
+  const grouped = {};
+
+  questions.forEach((q) => {
+    if (!grouped[q.category]) grouped[q.category] = [];
+    grouped[q.category].push(q);
+  });
+
+  const rounds = Math.max(...Object.values(grouped).map((g) => g.length));
+  const final = [];
+
+  for (let i = 0; i < rounds; i++) {
+    for (let cat in grouped) {
+      if (grouped[cat][i]) {
+        final.push(grouped[cat][i]);
+      }
+    }
+  }
+
+  return final;
+};
 
 export default function Quiz() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-  const [formValues, setFormValues] = useState({
-    interest: "",
-    studyMode: "Wszystko",
-    type: "",
-  });
+  const [formValues, setFormValues] = useState({});
+  const [results, setResults] = useState(null);
 
-  const fetchQuizResults = async () => {
-    const answers = {
-      interest: formValues.interest,
-      studyMode: formValues.studyMode,
-      type: formValues.type,
-      questions: questions.map((question) => ({
-        id: question.id,
-        answer: formValues[`question${question.id}`] || "Nie odpowiedziano",
-      })),
-    };
-
-    try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/matching/course-recommendations/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(answers),
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Dopasowania:", data);
-      } else {
-        console.error("Błąd w odpowiedzi z serwera:", response.status);
-      }
-    } catch (error) {
-      console.error("Błąd podczas wysyłania danych:", error);
-    }
-  };
-
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
+  const handlePageChange = (page) => setCurrentPage(page);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -98,8 +158,59 @@ export default function Quiz() {
     }));
   };
 
+  const interpretAnswer = (text) => {
+    if (
+      text === "Zdecydowanie tak" ||
+      text === "Bardzo" ||
+      text === "Tak" ||
+      text === "Zdecydowanie"
+    )
+      return 2;
+    if (
+      text === "Czasami" ||
+      text === "Czasem" ||
+      text === "Trochę" ||
+      text === "Zależy" ||
+      text === "Nie zawsze" ||
+      text === "Średnio"
+    )
+      return 1;
+    return 0;
+  };
+
+  const handleSubmit = async () => {
+    const answers = {};
+
+    questions.forEach((q) => {
+      const val = formValues[`question${q.id}`];
+      if (val !== undefined) {
+        answers[q.identifier] = interpretAnswer(val);
+      }
+    });
+
+    try {
+      const res = await fetch(
+        "http://localhost:8000/matching/course-recommendations/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ answers }),
+        }
+      );
+
+      const data = await res.json();
+      console.log("📊 Otrzymane dopasowania:", data.recommended_courses);
+      setResults(data.recommended_courses);
+    } catch (err) {
+      console.error("❌ Błąd przy wysyłaniu danych:", err);
+    }
+  };
+
+  const orderedQuestions = organizeQuestionsAlternating(questions);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedQuestions = questions.slice(
+  const paginatedQuestions = orderedQuestions.slice(
     startIndex,
     startIndex + itemsPerPage
   );
@@ -109,61 +220,14 @@ export default function Quiz() {
       <div className="mb-8">
         <div className="py-8">
           <h1 className="text-5xl text-center">
-            Odpowiedz na kilka pytań, które pozwolą nam ułatwić wskazanie
-            kierunków, <br></br>które mogą być dla Ciebie
+            Odpowiedz na kilka pytań, które pozwolą nam lepiej dopasować
+            kierunki studiów.
           </h1>
         </div>
-        <div className="text-center">
-          <button className="bg-green-600 text-white py-2 px-4 rounded">
-            Rozpocznij
-          </button>
-          <p className="mt-2 text-sm text-gray-500 mb-6">
-            Im więcej odpowiedzi, tym lepsze dopasowanie
-          </p>
-        </div>
-        <div className="flex justify-between mb-4">
-          <FormInput
-            type="radio"
-            label="Interesują mnie"
-            name="interest"
-            options={[
-              { value: "humanities", label: "Nauki społeczne i humanistyczne" },
-              { value: "science", label: "Nauki ścisłe i techniczne" },
-              { value: "medicine", label: "Nauki przyrodnicze i medyczne" },
-              { value: "everything", label: "Rozważam wszystko" },
-            ]}
-            value={formValues.interest}
-            onChange={handleInputChange}
-          />
-          <FormInput
-            type="select"
-            label="Ja mogę studiować"
-            name="studyMode"
-            options={[
-              { value: "Wszystkie", label: "Wszystko" },
-              { value: "Stacjonarne", label: "Stacjonarne" },
-              { value: "Niestacjonarne", label: "Niestacjonarne" },
-            ]}
-            value={formValues.studyMode}
-            onChange={handleInputChange}
-          />
 
-          <FormInput
-            type="radio"
-            label="Rozważam uczelnie i kierunki:"
-            name="type"
-            options={[
-              { value: "public", label: "Publiczne" },
-              { value: "private", label: "Prywatne" },
-              { value: "day", label: "Dziennie" },
-              { value: "evening", label: "Zaoczne" },
-            ]}
-            value={formValues.type}
-            onChange={handleInputChange}
-          />
-        </div>
         <hr className="border-t-4 border-gray-300 my-4" />
       </div>
+
       {paginatedQuestions.map((question) => (
         <div key={question.id} className="mb-4">
           <h2 className="text-xl font-semibold mb-2">{question.question}</h2>
@@ -179,24 +243,38 @@ export default function Quiz() {
           ))}
         </div>
       ))}
+
       <Pagination
         totalItems={questions.length}
         itemsPerPage={itemsPerPage}
         currentPage={currentPage}
         onPageChange={handlePageChange}
       />
+
       <div className="mt-8 text-center">
         <button
+          onClick={handleSubmit}
           className="bg-green-600 text-white py-2 px-4 rounded"
-          onClick={fetchQuizResults}
         >
           Zobacz dopasowania
         </button>
         <p className="mt-2 text-sm text-gray-500">
-          Odpowiedz na więcej pytań, żeby dostać bardziej szczegółowe
-          dopasowanie.
+          Odpowiedz na więcej pytań, żeby dopasowanie było jeszcze trafniejsze.
         </p>
       </div>
+
+      {results && (
+        <div className="mt-6">
+          <h2 className="text-2xl font-bold mb-2">Top kierunki:</h2>
+          <ul className="list-disc pl-6">
+            {results.slice(0, 5).map((course, idx) => (
+              <li key={idx}>
+                {course.course_name} — {course.score} pkt
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
