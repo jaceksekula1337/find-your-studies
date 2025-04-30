@@ -4,14 +4,15 @@ from .tasks import match_courses
 
 @api_view(['POST'])
 def get_course_recommendations(request):
-    user_answers = request.data.get("answers", {})
-    
-    if not user_answers:
-        return Response({"error": "No answers provided"}, status=400)
+    # Pobierz dane przesłane z frontendu
+    raw_answers = request.data.get("answers", {})
 
-    sorted_courses, flagged_courses = match_courses(user_answers)
-    
-    # Formatowanie danych do JSON
+    if not raw_answers:
+        return Response({"error": "Brak odpowiedzi użytkownika"}, status=400)
+
+    # Oczekujemy odpowiedzi w formacie: {"O_try_new_things": 2, "C_task_completion": 1, ...}
+    sorted_courses, flagged_courses = match_courses(raw_answers)
+
     response_data = {
         "recommended_courses": [
             {
@@ -19,7 +20,7 @@ def get_course_recommendations(request):
                 "score": course[1],
                 "alerts": flagged_courses.get(course[0].course_name, [])
             }
-            for course in sorted_courses
+            for course in sorted_courses[:5]  # np. tylko Top 5
         ]
     }
 
