@@ -15,33 +15,37 @@ Find Your Studies to aplikacja, która:
 
 ## Co już działa?
 
-- ✅ Połączenie z API i pobieranie prawdziwych danych o kierunkach
-- ✅ Zbudowana baza danych z kierunkami + cechami (Django ORM)
-- ✅ Obecnie zaimplementowane są pytania na sztywno z poziomu Frontu, dla weryfikacji wizualnej
-- ✅ Frontend w React z quizem (przygotowany do połączenia z backendem)
-- ✅ Algorytm dopasowujący odpowiedzi użytkownika do kierunków (punktacja + alerty)
-- ✅ Wysyłanie odpowiedzi z quizu do backendu (POST + JSON)
+- ✅ Połączenie z API POLON i import danych do bazy (Django)
+- ✅ Baza danych z kursami i powiązaniami do pytań (Question → CourseQuestionScore)
+- ✅ Frontend w React z quizem (15 pytań Big Five, paginacja, logika interpretacji odpowiedzi)
+- ✅ Backendowy algorytm dopasowania (punktacja + alerty na niedopasowania)
+- ✅ Połączenie Front–Back (wysyłka JSON + odbiór rekomendacji)
+- ✅ Przetestowane lokalnie z użyciem Postmana i konsoli Reacta
+- ✅ Dane w backendzie testowo przypisane do trzech kierunków
 
 ---
 
 ## Co jeszcze do zrobienia?
 
-- 🔲 Przede wszystkim połączenie wszystkiego w całość (interakcja Frontu z Backendem)
-- 🔲 Wdrożenie drzewa decyzyjnego (dla dynamicznych pytań)
-- 🔲 Poprawienie struktury backendu oraz weryfikacja pytań zaimplementowanych na stronie
+- 🔲 Dodanie większej liczby kierunków i ich profili cech
+- 🔲 Stylizacja wyników dopasowania i UX (np. opis cech, feedback)
+- 🔲 Możliwość zapisywania wyników i odpowiedzi użytkowników
 - 🔲 Zapisywanie wyników dopasowania (logi + feedback od usera)
-- 🔲 Widok wizualny Frontu - obecny jest pewnym "szkieletem"
+- 🔲  Wersja produkcyjna (Netlify + Render)
 
 ---
 
 ## Algorytm dopasowania
 
 W skrócie:
-1. Każde pytanie przypisane jest do jednej z 5 cech Big Five (np. empatia → ugodowość).
-2. Każdy kierunek w bazie ma przypisane wartości do pytań (jak bardzo dana cecha jest potrzebna).
-3. Użytkownik wypełnia quiz → odpowiedzi trafiają na backend.
-4. Backend porównuje odpowiedzi z wymaganiami kierunków → liczy punktację.
-5. Zwracane są top 5 kierunków z największą zgodnością.
+1. Użytkownik odpowiada na 15 pytań – każde z nich reprezentuje jedną z cech modelu Big Five (np. neurotyczność, ugodowość).
+2. Każde pytanie ma swój identifier, np. O_try_new_things.
+3. Kierunki studiów mają przypisaną wartość 0–2 do każdego pytania (jak bardzo ta cecha jest istotna).
+4. Backend porównuje odpowiedzi użytkownika z wymaganiami kierunków:
+- trafienie = +2 pkt
+- różnica o 1 = +1 pkt
+- różnica o 2 = 0 + alert
+5. Zwracane są TOP kierunki wraz z liczbą punktów i listą potencjalnych niezgodności.
 
 ---
 
@@ -55,7 +59,7 @@ W skrócie:
 
 ---
 
-## 💬 Dlaczego ten projekt?
+## Dlaczego ten projekt?
 
 Bo wybór studiów często przypomina rzut monetą – a może da się to zrobić lepiej, mądrzej i nowocześniej? Find Your Studies ma być narzędziem pomocnym dla uczniów, doradców kariery i uczelni.
 
