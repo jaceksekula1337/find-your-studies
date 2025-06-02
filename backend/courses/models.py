@@ -16,12 +16,14 @@ class Course(models.Model):
 
 
 class Question(models.Model):
-    identifier = models.CharField(max_length=50, unique=True, null=True, blank=True)  # <- zmiana
+    identifier = models.CharField(max_length=50, unique=True)
     text = models.TextField()
-    category = models.CharField(max_length=20)
+    category = models.CharField(max_length=20)  # openness, conscientiousness, etc.
+    reverse_scored = models.BooleanField(default=False)  # <--- NEW FIELD
 
     def __str__(self):
         return f"{self.identifier} - {self.category}"
+
 
 
 class CourseQuestionScore(models.Model):

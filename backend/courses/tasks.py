@@ -5,38 +5,45 @@ from courses.models import Course, Question, CourseQuestionScore
 # Dodanie pytań Big Five
 def add_big5_questions():
     questions_data = [
-        # OPENNESS
-        ("O_try_new_things", "Lubię próbować nowych rzeczy.", "openness"),
-        ("O_art_culture", "Interesuję się sztuką i kulturą.", "openness"),
-        ("O_creative_thinking", "Lubię myśleć w nieszablonowy sposób.", "openness"),
-
-        # CONSCIENTIOUSNESS
-        ("C_task_completion", "Zawsze kończę rozpoczęte zadania.", "conscientiousness"),
-        ("C_organized", "Jestem dobrze zorganizowany/a.", "conscientiousness"),
-        ("C_time_management", "Potrafię zarządzać swoim czasem efektywnie.", "conscientiousness"),
-
         # EXTRAVERSION
-        ("E_attention_seeker", "Lubię być w centrum uwagi.", "extraversion"),
-        ("E_social_energy", "Czerpię energię z kontaktów z ludźmi.", "extraversion"),
-        ("E_teamwork", "Lubię pracę zespołową.", "extraversion"),
+        ("E_life_party", "I am the life of the party.", "extraversion", False),
+        ("E_dont_talk", "I don’t talk a lot.", "extraversion", True),
+        ("E_party_talker", "I talk to a lot of different people at parties.", "extraversion", False),
+        ("E_background", "I keep in the background.", "extraversion", True),
 
         # AGREEABLENESS
-        ("A_helping_others", "Pomaganie innym sprawia mi radość.", "agreeableness"),
-        ("A_easy_connecting", "Łatwo nawiązuję kontakt z innymi ludźmi.", "agreeableness"),
-        ("A_forgiving", "Jestem wyrozumiały/a wobec błędów innych.", "agreeableness"),
+        ("A_sympathize", "I sympathize with others’ feelings.", "agreeableness", False),
+        ("A_not_interested", "I am not interested in other people’s problems.", "agreeableness", True),
+        ("A_feel_emotions", "I feel others’ emotions.", "agreeableness", False),
+        ("A_dont_care", "I am not really interested in others.", "agreeableness", True),
+
+        # CONSCIENTIOUSNESS
+        ("C_chores_done", "I get chores done right away.", "conscientiousness", False),
+        ("C_forget_stuff", "I often forget to put things back in their proper place.", "conscientiousness", True),
+        ("C_order", "I like order.", "conscientiousness", False),
+        ("C_mess", "I make a mess of things.", "conscientiousness", True),
 
         # NEUROTICISM
-        ("N_stress_prone", "Często się stresuję.", "neuroticism"),
-        ("N_unwarranted_worry", "Zdarza mi się martwić bez powodu.", "neuroticism"),
-        ("N_low_resilience", "Mam problemy z utrzymaniem spokoju w trudnych sytuacjach.", "neuroticism"),
+        ("N_mood_swings", "I have frequent mood swings.", "neuroticism", False),
+        ("N_relaxed", "I am relaxed most of the time.", "neuroticism", True),
+        ("N_upset", "I get upset easily.", "neuroticism", False),
+        ("N_seldom_blue", "I seldom feel blue.", "neuroticism", True),
+
+        # OPENNESS
+        ("O_imagination", "I have a vivid imagination.", "openness", False),
+        ("O_no_abstract", "I am not interested in abstract ideas.", "openness", True),
+        ("O_difficulty_abstract", "I have difficulty understanding abstract ideas.", "openness", True),
+        ("O_no_imagination", "I do not have a good imagination.", "openness", True),
     ]
 
-    for identifier, text, category in questions_data:
+    for ident, text, cat, rev in questions_data:
         Question.objects.update_or_create(
-            identifier=identifier,
-            defaults={"text": text, "category": category}
+            identifier=ident,
+            defaults={"text": text, "category": cat, "reverse_scored": rev}
         )
-    print("✅ Dodano pytania Big Five do bazy.")
+
+    print("✅ Dodano nowe pytania Mini-IPIP.")
+
 
 # Przypisanie punktów do pytań względem kierunków
 def assign_question_scores():
