@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Pagination from "../components/Pagination";
 import FormInput from "../components/FormInput";
 
@@ -178,21 +178,61 @@ export default function Quiz() {
     changeSuggestion: "",
   });
   const [results, setResults] = useState(null);
+  const [transitioning, setTransitioning] = useState(false);
+  const [visitedPages, setVisitedPages] = useState(new Set());
 
-  const itemsPerPage = 5;
-  const orderedQuestions = [...questions];
+  const resultsRef = useRef(null);
+  const itemsPerPage = 2;
+  const totalQuestions = questions.length;
+  const answeredCount = Object.keys(formValues).length;
+  const progress = Math.min((answeredCount / totalQuestions) * 100, 100);
+
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedQuestions = orderedQuestions.slice(
+  const paginatedQuestions = questions.slice(
     startIndex,
     startIndex + itemsPerPage
   );
 
+  useEffect(() => {
+    if (results && resultsRef.current) {
+      const yOffset = -100;
+      const y =
+        resultsRef.current.getBoundingClientRect().top +
+        window.pageYOffset +
+        yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  }, [results]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormValues((prev) => ({
-      ...prev,
-      [name]: parseInt(value),
-    }));
+
+    setFormValues((prev) => {
+      const updated = { ...prev, [name]: parseInt(value) };
+
+      const allAnswered = paginatedQuestions.every((q) =>
+        updated.hasOwnProperty(`question${q.id}`)
+      );
+
+      const isLastPage = currentPage * itemsPerPage >= questions.length;
+      const alreadyVisited = visitedPages.has(currentPage);
+
+      if (allAnswered && !isLastPage && !alreadyVisited) {
+        setTimeout(() => {
+          setTransitioning(true);
+          setTimeout(() => {
+            setCurrentPage((prevPage) => {
+              const newPage = prevPage + 1;
+              setVisitedPages((prevSet) => new Set(prevSet).add(prevPage));
+              setTransitioning(false);
+              return newPage;
+            });
+          }, 300);
+        }, 200);
+      }
+
+      return updated;
+    });
   };
 
   const handleFeedbackChange = (e) => {
@@ -263,192 +303,221 @@ export default function Quiz() {
   const handlePageChange = (page) => setCurrentPage(page);
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-4xl font-bold text-center mb-8">
-        Dopasuj kierunek studiów do swojej osobowości
-      </h1>
-      {paginatedQuestions.map((q) => {
-        const name = `question${q.id}`;
-        const isAnswered = formValues[name] !== undefined;
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#121212] via-[#3c2d5d] to-[#121212] text-gray-100 pt-24 py-12 px-4">
+      <div className="max-w-5xl mx-auto">
+        <h1 className="text-4xl font-extrabold text-center mb-12">
+           Dopasuj kierunek studiów do swojej osobowości
+        </h1>
 
-        return (
-          <div key={q.id} className="mb-8">
-            <h2 className="text-lg font-medium mb-3">{q.question}</h2>
-            <input
-              type="range"
-              min="1"
-              max="5"
-              step="1"
-              value={formValues[name] || 3}
-              name={name}
-              onChange={handleInputChange}
-              className={`w-full h-3 rounded-full cursor-pointer transition-all duration-300 ${
-                isAnswered ? "accent-blue-600" : "accent-gray-400 opacity-50"
-              }`}
-            />
-            <div className="flex justify-between text-sm text-gray-500 mt-1">
-              <span>1 – Strongly disagree</span>
-              <span>3 – Neutral</span>
-              <span>5 – Strongly agree</span>
-            </div>
+        {/* Pasek postępu */}
+        <div className="mb-6">
+          <div className="h-4 w-full bg-gray-700 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-[#9f6ee9] transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            ></div>
           </div>
-        );
-      })}
-
-      <Pagination
-        totalItems={questions.length}
-        itemsPerPage={itemsPerPage}
-        currentPage={currentPage}
-        onPageChange={handlePageChange}
-      />
-      <div className="text-center mt-8">
-        <button
-          onClick={handleSubmit}
-          className={`py-3 px-6 rounded text-white font-semibold ${
-            Object.keys(formValues).length === questions.length
-              ? "bg-green-600 hover:bg-green-700"
-              : "bg-gray-400 cursor-not-allowed"
-          }`}
-          disabled={Object.keys(formValues).length !== questions.length}
-        >
-          Zobacz dopasowania
-        </button>
-        {Object.keys(formValues).length !== questions.length && (
-          <p className="text-sm mt-2 text-gray-500">
-            Uzupełnij wszystkie odpowiedzi, by zobaczyć wynik
+          <p className="text-right text-xs text-gray-400 mt-1">
+            {answeredCount} / {totalQuestions} pytań
           </p>
-        )}
-      </div>
+        </div>
 
-      {results && (
-        <div className="mt-12">
-          <h2 className="text-3xl font-bold mb-6 text-center">
-            🎯 Twoje najlepiej dopasowane kierunki
-          </h2>
+        {/* Pytania z animacją */}
+        <div
+          className={`space-y-10 transition-opacity duration-300 ${
+            transitioning ? "opacity-0" : "opacity-100"
+          }`}
+        >
+          {paginatedQuestions.map((q) => {
+            const name = `question${q.id}`;
+            const currentValue = formValues[name];
 
-          <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6">
-            {results.map((r, i) => (
+            return (
               <div
-                key={i}
-                className="border rounded-xl p-5 shadow-md bg-white hover:shadow-lg transition duration-300"
+                key={q.id}
+                className="bg-[#2a2a3b] p-6 rounded-2xl shadow-sm border border-[#3d3d4f]"
               >
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-xl font-semibold">{r.course_name}</h3>
-                  <span
-                    className={`font-bold text-lg ${
-                      r.score >= 15
-                        ? "text-green-600"
-                        : r.score >= 10
-                        ? "text-blue-600"
-                        : "text-gray-600"
-                    }`}
-                  >
-                    {r.score} pkt
-                  </span>
-                </div>
+                <h2 className="text-lg font-semibold mb-4 text-gray-100">
+                  {q.question}
+                </h2>
 
-                {r.alerts.length > 0 && (
-                  <div className="mt-3 bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm text-yellow-700 rounded">
-                    <p className="font-medium mb-1">⚠️ Rozbieżności:</p>
-                    <ul className="list-disc ml-5 space-y-1">
-                      {r.alerts.map((alert, idx) => (
-                        <li key={idx}>{alert.message}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-12">
-            <h3 className="text-2xl font-semibold mb-4 text-center">
-              📝 Twoja opinia
-            </h3>
-            {feedbackQuestions.map((q, i) => (
-              <div key={q.id} className="mb-4">
-                <p className="mb-1">{q.text}</p>
-                <div className="flex gap-4">
+                <div className="grid grid-cols-5 gap-4 px-4 py-2 bg-[#242434] rounded-xl text-center">
                   {[1, 2, 3, 4, 5].map((val) => (
-                    <label key={val} className="flex items-center gap-1">
+                    <label
+                      key={`${q.id}-${val}`}
+                      className="flex flex-col items-center text-sm cursor-pointer"
+                    >
                       <input
                         type="radio"
-                        name={q.id}
+                        name={name}
                         value={val}
-                        checked={feedbackValues[q.id] == val}
-                        onChange={handleFeedbackChange}
+                        checked={currentValue === val}
+                        onChange={handleInputChange}
+                        className="sr-only"
                       />
-                      {val}
+                      <div
+                        className={`w-10 h-10 flex items-center justify-center rounded-full transition border-2 ${
+                          currentValue === val
+                            ? "bg-[#9f6ee9] text-white border-[#9f6ee9] shadow-md"
+                            : "bg-[#1e1e2e] text-gray-300 border-gray-600 hover:border-purple-300"
+                        }`}
+                      >
+                        {val}
+                      </div>
                     </label>
                   ))}
                 </div>
-              </div>
-            ))}
 
-            <div className="mt-6 space-y-4">
-              <div>
-                <label className="block mb-1 font-medium">
-                  Were any of the suggested programs completely off or
-                  surprising to you? Why?
-                </label>
-                <textarea
-                  name="whyWrong"
-                  className="w-full border rounded p-2"
-                  rows={3}
-                  value={openFeedback.whyWrong}
-                  onChange={handleOpenFeedbackChange}
-                />
+                <div className="mt-2 grid grid-cols-5 gap-4 text-xs text-gray-400 px-4 text-center">
+                  <span>Zdecydowanie się nie zgadzam</span>
+                  <span>Nie zgadzam się</span>
+                  <span>Nie mam zdania</span>
+                  <span>Zgadzam się</span>
+                  <span>Zdecydowanie się zgadzam</span>
+                </div>
               </div>
+            );
+          })}
+        </div>
 
-              <div>
-                <label className="block mb-1 font-medium">
-                  What kind of study program were you expecting instead?
-                </label>
-                <textarea
-                  name="expected"
-                  className="w-full border rounded p-2"
-                  rows={3}
-                  value={openFeedback.expected}
-                  onChange={handleOpenFeedbackChange}
-                />
-              </div>
+        <div className="mt-10">
+          <Pagination
+            totalItems={questions.length}
+            itemsPerPage={itemsPerPage}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+          />
+        </div>
 
-              <div>
-                <label className="block mb-1 font-medium">
-                  What would you change to make the recommendations more
-                  accurate?
-                </label>
-                <textarea
-                  name="changeSuggestion"
-                  className="w-full border rounded p-2"
-                  rows={3}
-                  value={openFeedback.changeSuggestion}
-                  onChange={handleOpenFeedbackChange}
-                />
-              </div>
-              <div className="mt-6 text-center">
-                <button
-                  onClick={handleFeedbackSubmit}
-                  className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded transition disabled:opacity-50"
-                  disabled={
-                    Object.keys(feedbackValues).length <
-                      feedbackQuestions.length ||
-                    !openFeedback.whyWrong ||
-                    !openFeedback.expected ||
-                    !openFeedback.changeSuggestion
-                  }
+        <div className="text-center mt-8">
+          <button
+            onClick={handleSubmit}
+            disabled={Object.keys(formValues).length !== questions.length}
+            className={`py-4 px-10 text-lg font-bold rounded-full transition duration-300 shadow-md disabled:opacity-40 disabled:cursor-not-allowed ${
+              Object.keys(formValues).length === questions.length
+                ? "bg-[#9f6ee9] text-white hover:bg-purple-500"
+                : "bg-gray-700 text-gray-400"
+            }`}
+          >
+            Zobacz dopasowania
+          </button>
+        </div>
+        {results && (
+          <div className="mt-16" ref={resultsRef}>
+            <h2 className="text-3xl font-bold text-center text-[#d1bafc] mb-8">
+              🎯 Twoje najlepiej dopasowane kierunki
+            </h2>
+
+            <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6">
+              {results.map((r, i) => (
+                <div
+                  key={i}
+                  className="bg-[#2e2e40] border border-purple-500 rounded-2xl p-5 shadow-sm hover:shadow-md transition"
                 >
-                  Wyślij opinię
-                </button>
-                <p className="text-sm text-gray-500 mt-2">
-                  Dziękujemy za wypełnienie – Twoja opinia pomaga ulepszyć
-                  system.
-                </p>
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-lg font-semibold text-purple-200">
+                      {r.course_name}
+                    </h3>
+                    <span
+                      className={`text-sm font-semibold ${
+                        r.score >= 15
+                          ? "text-green-400"
+                          : r.score >= 10
+                          ? "text-blue-400"
+                          : "text-gray-400"
+                      }`}
+                    >
+                      {r.score} pkt
+                    </span>
+                  </div>
+
+                  {r.alerts.length > 0 && (
+                    <div className="mt-3 bg-yellow-100/10 border-l-4 border-yellow-400 p-3 text-sm text-yellow-200 rounded">
+                      <p className="font-medium mb-1">⚠️ Rozbieżności:</p>
+                      <ul className="list-disc ml-5 space-y-1">
+                        {r.alerts.map((alert, idx) => (
+                          <li key={idx}>{alert.message}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-16">
+              <h3 className="text-2xl font-semibold text-center text-purple-200 mb-6">
+                📝 Twoja opinia
+              </h3>
+
+              <div className="space-y-6">
+                {feedbackQuestions.map((q) => (
+                  <div
+                    key={q.id}
+                    className="bg-[#2a2a3b] rounded-xl p-4 shadow-sm border border-[#3d3d4f]"
+                  >
+                    <p className="mb-2">{q.text}</p>
+                    <div className="flex gap-4">
+                      {[1, 2, 3, 4, 5].map((val) => (
+                        <label key={val} className="flex items-center gap-1">
+                          <input
+                            type="radio"
+                            name={q.id}
+                            value={val}
+                            checked={feedbackValues[q.id] == val}
+                            onChange={handleFeedbackChange}
+                          />
+                          {val}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                {["whyWrong", "expected", "changeSuggestion"].map(
+                  (key, idx) => (
+                    <div key={idx}>
+                      <label className="block mb-2 font-medium">
+                        {key === "whyWrong"
+                          ? "Czy któryś z kierunków był nietrafiony? Dlaczego?"
+                          : key === "expected"
+                          ? "Czego się spodziewałeś zamiast tego?"
+                          : "Jak można by lepiej dopasować propozycje?"}
+                      </label>
+                      <textarea
+                        name={key}
+                        value={openFeedback[key]}
+                        onChange={handleOpenFeedbackChange}
+                        rows={3}
+                        className="w-full border border-gray-600 bg-[#1f1f2e] text-gray-100 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                    </div>
+                  )
+                )}
+
+                <div className="text-center mt-8">
+                  <button
+                    onClick={handleFeedbackSubmit}
+                    disabled={
+                      Object.keys(feedbackValues).length <
+                        feedbackQuestions.length ||
+                      !openFeedback.whyWrong ||
+                      !openFeedback.expected ||
+                      !openFeedback.changeSuggestion
+                    }
+                    className="bg-[#9f6ee9] hover:bg-purple-500 text-white font-bold py-3 px-8 rounded-full transition disabled:opacity-30"
+                  >
+                    Wyślij opinię
+                  </button>
+                  <p className="text-sm text-gray-400 mt-2">
+                    Dziękujemy! Twoja opinia pomaga ulepszyć nasz system.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
