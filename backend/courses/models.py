@@ -24,12 +24,15 @@ class Question(models.Model):
     def __str__(self):
         return f"{self.identifier} - {self.category}"
 
-
-
-class CourseQuestionScore(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    score = models.IntegerField()
+class CourseTraitProfile(models.Model):
+    course = models.OneToOneField(Course, on_delete=models.CASCADE, related_name="trait_profile")
+    extraversion = models.FloatField()
+    agreeableness = models.FloatField()
+    conscientiousness = models.FloatField()
+    neuroticism = models.FloatField()
+    openness = models.FloatField()
 
     def __str__(self):
-        return f"{self.course.course_name} - {self.question.identifier} - {self.score}"
+        return f"Profile for {self.course.course_name}"
+
+

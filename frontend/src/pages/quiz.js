@@ -178,6 +178,7 @@ export default function Quiz() {
     changeSuggestion: "",
   });
   const [results, setResults] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
   const [transitioning, setTransitioning] = useState(false);
   const [visitedPages, setVisitedPages] = useState(new Set());
 
@@ -267,6 +268,7 @@ export default function Quiz() {
       );
       const data = await res.json();
       setResults(data.recommended_courses);
+      setUserProfile(data.user_profile); // <-- Zapisz profil
     } catch (err) {
       console.error("❌ Błąd przy wysyłaniu danych:", err);
     }
@@ -278,6 +280,9 @@ export default function Quiz() {
       why_wrong: openFeedback.whyWrong,
       expected: openFeedback.expected,
       change_suggestion: openFeedback.changeSuggestion,
+      user_answers: formValues,
+      user_profile: userProfile,
+      recommended_courses: results?.map((r) => r.course_name),
     };
 
     try {
@@ -306,7 +311,7 @@ export default function Quiz() {
     <div className="min-h-screen w-full bg-gradient-to-br from-[#121212] via-[#3c2d5d] to-[#121212] text-gray-100 pt-24 py-12 px-4">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-4xl font-extrabold text-center mb-12">
-           Dopasuj kierunek studiów do swojej osobowości
+          Dopasuj kierunek studiów do swojej osobowości
         </h1>
 
         {/* Pasek postępu */}
@@ -418,20 +423,12 @@ export default function Quiz() {
                     <h3 className="text-lg font-semibold text-purple-200">
                       {r.course_name}
                     </h3>
-                    <span
-                      className={`text-sm font-semibold ${
-                        r.score >= 15
-                          ? "text-green-400"
-                          : r.score >= 10
-                          ? "text-blue-400"
-                          : "text-gray-400"
-                      }`}
-                    >
-                      {r.score} pkt
+                    <span className="text-sm font-semibold text-green-400">
+                      {r.score}% dopasowania
                     </span>
                   </div>
 
-                  {r.alerts.length > 0 && (
+                  {r.alerts && r.alerts.length > 0 && (
                     <div className="mt-3 bg-yellow-100/10 border-l-4 border-yellow-400 p-3 text-sm text-yellow-200 rounded">
                       <p className="font-medium mb-1">⚠️ Rozbieżności:</p>
                       <ul className="list-disc ml-5 space-y-1">
@@ -444,7 +441,20 @@ export default function Quiz() {
                 </div>
               ))}
             </div>
-
+            {userProfile && (
+              <div className="mt-10 bg-[#1f1f2e] p-6 rounded-xl text-sm text-gray-300">
+                <h4 className="text-lg font-semibold mb-2">
+                  📊 Twój profil osobowości
+                </h4>
+                <ul className="space-y-1">
+                  {Object.entries(userProfile).map(([trait, value]) => (
+                    <li key={trait}>
+                      <strong>{trait}:</strong> {value.toFixed(2)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <div className="mt-16">
               <h3 className="text-2xl font-semibold text-center text-purple-200 mb-6">
                 📝 Twoja opinia

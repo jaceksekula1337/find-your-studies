@@ -1,36 +1,54 @@
-from courses.models import Course, Question, CourseQuestionScore
+from courses.models import CourseTraitProfile
 
-def match_courses(user_answers):
-    course_scores = {}
-    flagged_courses = {}
 
-    for course in Course.objects.all():
+def calculate_user_profile(user_answers):
+    from courses.models import Question
+
+    trait_totals = {
+        "extraversion": [],
+        "agreeableness": [],
+        "conscientiousness": [],
+        "neuroticism": [],
+        "openness": [],
+    }
+
+    for qid, value in user_answers.items():
+        question = Question.objects.filter(identifier=qid).first()
+        if not question:
+            continue
+
+        val = int(value)
+        if question.reverse_scored:
+            val = 5 - val
+
+        trait_totals[question.category].append(val)
+
+    profile = {}
+    for trait, values in trait_totals.items():
+        profile[trait] = round(sum(values) / len(values), 2) if values else 0.0
+
+    return profile
+
+
+def match_courses_by_traits(user_profile):
+    matches = []
+
+    for trait_profile in CourseTraitProfile.objects.select_related("course").all():
         score = 0
-        alerts = []
-        question_scores = CourseQuestionScore.objects.filter(course=course)
+        for trait in user_profile:
+            course_value = getattr(trait_profile, trait)
+            user_value = user_profile[trait]
+            diff = abs(user_value - course_value)
+            score += (4 - diff)  # Im mniejsza różnica, tym większy wynik
 
-        for course_question in question_scores:
-            question_identifier = course_question.question.identifier
-            course_score = course_question.score
-            user_score = user_answers.get(question_identifier)
+        max_score = 5 * len(user_profile)
+        normalized_score = round((score / max_score) * 100, 2)
 
-            if user_score is not None:
-                difference = int(user_score) - course_score
-                if difference == 0:
-                    score += 2
-                elif abs(difference) == 1:
-                    score += 1
-                elif abs(difference) >= 2:
-                    alerts.append({
-                        "question": course_question.question.text,
-                        "user_value": user_score,
-                        "course_value": course_score,
-                        "message": f"Duża różnica w pytaniu: \"{course_question.question.text}\" – kierunek oczekuje poziomu {course_score}, a użytkownik zadeklarował {user_score}."
-                    })
+        matches.append({
+            "course": trait_profile.course,
+            "score": normalized_score,
+            "alerts": []
+        })
 
-        course_scores[course] = score
-        if alerts:
-            flagged_courses[course.course_name] = alerts
-
-    sorted_courses = sorted(course_scores.items(), key=lambda x: x[1], reverse=True)
-    return sorted_courses, flagged_courses
+    matches.sort(key=lambda x: x["score"], reverse=True)
+    return matches, user_profile

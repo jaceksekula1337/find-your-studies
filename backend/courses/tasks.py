@@ -1,6 +1,6 @@
 import requests
 from django.utils import timezone
-from courses.models import Course, Question, CourseQuestionScore
+from courses.models import Course, Question
 
 # Dodanie pytań Big Five
 def add_big5_questions():
@@ -44,81 +44,144 @@ def add_big5_questions():
 
     print("✅ Dodano nowe pytania Mini-IPIP.")
 
+from courses.models import Course, CourseTraitProfile
+from uuid import UUID
 
-# Przypisanie punktów do pytań względem kierunków
-def assign_question_scores():
-    question_scores_data = {
-        "fd3ea9ae-3af8-4c66-af9a-7337b8436645": {  # Podistria
-            "O_try_new_things": 2,
-            "O_art_culture": 2,
-            "O_creative_thinking": 2,
-            "C_task_completion": 1,
-            "C_organized": 0,
-            "C_time_management": 1,
-            "E_attention_seeker": 1,
-            "E_social_energy": 2,
-            "E_teamwork": 2,
-            "A_helping_others": 2,
-            "A_easy_connecting": 2,
-            "A_forgiving": 1,
-            "N_stress_prone": 1,
-            "N_unwarranted_worry": 1,
-            "N_low_resilience": 1,
+def seed_course_trait_profiles():
+    data = [
+        {
+            "uuid": "11",  # Informatyka (II st.)
+            "traits": {"openness": 4.5, "conscientiousness": 4.2, "extraversion": 2.5, "agreeableness": 3.0, "neuroticism": 2.0},
         },
-        "05a709a0-6f7f-420c-963f-6d51c9f0aa21": {  # Architektura
-            "O_try_new_things": 2,
-            "O_art_culture": 2,
-            "O_creative_thinking": 2,
-            "C_task_completion": 2,
-            "C_organized": 2,
-            "C_time_management": 1,
-            "E_attention_seeker": 1,
-            "E_social_energy": 1,
-            "E_teamwork": 1,
-            "A_helping_others": 0,
-            "A_easy_connecting": 0,
-            "A_forgiving": 1,
-            "N_stress_prone": 1,
-            "N_unwarranted_worry": 1,
-            "N_low_resilience": 2,
+        {
+            "uuid": "24",  # Informatyka (I st.)
+            "traits": {"openness": 4.4, "conscientiousness": 4.0, "extraversion": 2.8, "agreeableness": 3.2, "neuroticism": 2.2},
         },
-        "6c534c56-9c5f-4e5f-9aab-04c295ed9352": {  # Administracja
-            "O_try_new_things": 1,
-            "O_art_culture": 1,
-            "O_creative_thinking": 1,
-            "C_task_completion": 2,
-            "C_organized": 2,
-            "C_time_management": 2,
-            "E_attention_seeker": 1,
-            "E_social_energy": 2,
-            "E_teamwork": 2,
-            "A_helping_others": 2,
-            "A_easy_connecting": 2,
-            "A_forgiving": 2,
-            "N_stress_prone": 1,
-            "N_unwarranted_worry": 1,
-            "N_low_resilience": 1,
+        {
+            "uuid": "28",  # Psychologia
+            "traits": {"openness": 4.7, "conscientiousness": 3.8, "extraversion": 3.6, "agreeableness": 4.4, "neuroticism": 3.9},
         },
-    }
+        {
+            "uuid": "25",  # Kierunek lekarski
+            "traits": {"openness": 4.0, "conscientiousness": 4.7, "extraversion": 3.5, "agreeableness": 4.3, "neuroticism": 3.1},
+        },
+        {
+            "uuid": "9",  # Grafika
+            "traits": {"openness": 4.9, "conscientiousness": 3.3, "extraversion": 3.8, "agreeableness": 3.5, "neuroticism": 3.0},
+        },
+        {
+            "uuid": "17",  # Ekonomia
+            "traits": {"openness": 3.8, "conscientiousness": 4.1, "extraversion": 3.4, "agreeableness": 3.2, "neuroticism": 2.9},
+        },
+        {
+            "uuid": "74",  # Informatyka w biznesie
+            "traits": {"openness": 4.3, "conscientiousness": 4.0, "extraversion": 3.0, "agreeableness": 3.1, "neuroticism": 2.5},
+        },
+        {
+            "uuid": "57",  # Dziennikarstwo
+            "traits": {"openness": 4.6, "conscientiousness": 3.7, "extraversion": 4.5, "agreeableness": 3.9, "neuroticism": 3.3},
+        },
+        {
+            "uuid": "26",  # Energetyka
+            "traits": {"openness": 3.9, "conscientiousness": 4.2, "extraversion": 2.9, "agreeableness": 3.0, "neuroticism": 2.4},
+        },
+        {
+            "uuid": "50",  # Finanse i rachunkowość
+            "traits": {"openness": 3.6, "conscientiousness": 4.5, "extraversion": 3.2, "agreeableness": 3.1, "neuroticism": 2.7},
+        },
+    ]
 
-    for course_uuid, question_data in question_scores_data.items():
-        course = Course.objects.filter(course_uuid=course_uuid).first()
-        if not course:
-            print(f"⛔ Kurs {course_uuid} nie znaleziony.")
-            continue
+    created = 0
+    for entry in data:
+        try:
+            course = Course.objects.get(id=int(entry["uuid"]))
+            if not hasattr(course, "trait_profile"):
+                CourseTraitProfile.objects.create(
+                    course=course,
+                    **entry["traits"]
+                )
+                created += 1
+        except Course.DoesNotExist:
+            print(f"⚠️ Nie znaleziono kierunku ID: {entry['uuid']}")
+        except Exception as e:
+            print(f"❌ Błąd przy ID {entry['uuid']}: {e}")
 
-        for identifier, score in question_data.items():
-            question = Question.objects.filter(identifier=identifier).first()
-            if not question:
-                print(f"⚠️ Pytanie {identifier} nie znalezione.")
-                continue
+    print(f"✅ Dodano {created} profili kierunków.")
 
-            CourseQuestionScore.objects.update_or_create(
-                course=course,
-                question=question,
-                defaults={"score": score}
-            )
-    print("✅ Przypisano dopasowania pytań do kierunków.")
+# # Przypisanie punktów do pytań względem kierunków
+# def assign_question_scores():
+#     question_scores_data = {
+#         "fd3ea9ae-3af8-4c66-af9a-7337b8436645": {  # Podistria
+#             "O_try_new_things": 2,
+#             "O_art_culture": 2,
+#             "O_creative_thinking": 2,
+#             "C_task_completion": 1,
+#             "C_organized": 0,
+#             "C_time_management": 1,
+#             "E_attention_seeker": 1,
+#             "E_social_energy": 2,
+#             "E_teamwork": 2,
+#             "A_helping_others": 2,
+#             "A_easy_connecting": 2,
+#             "A_forgiving": 1,
+#             "N_stress_prone": 1,
+#             "N_unwarranted_worry": 1,
+#             "N_low_resilience": 1,
+#         },
+#         "05a709a0-6f7f-420c-963f-6d51c9f0aa21": {  # Architektura
+#             "O_try_new_things": 2,
+#             "O_art_culture": 2,
+#             "O_creative_thinking": 2,
+#             "C_task_completion": 2,
+#             "C_organized": 2,
+#             "C_time_management": 1,
+#             "E_attention_seeker": 1,
+#             "E_social_energy": 1,
+#             "E_teamwork": 1,
+#             "A_helping_others": 0,
+#             "A_easy_connecting": 0,
+#             "A_forgiving": 1,
+#             "N_stress_prone": 1,
+#             "N_unwarranted_worry": 1,
+#             "N_low_resilience": 2,
+#         },
+#         "6c534c56-9c5f-4e5f-9aab-04c295ed9352": {  # Administracja
+#             "O_try_new_things": 1,
+#             "O_art_culture": 1,
+#             "O_creative_thinking": 1,
+#             "C_task_completion": 2,
+#             "C_organized": 2,
+#             "C_time_management": 2,
+#             "E_attention_seeker": 1,
+#             "E_social_energy": 2,
+#             "E_teamwork": 2,
+#             "A_helping_others": 2,
+#             "A_easy_connecting": 2,
+#             "A_forgiving": 2,
+#             "N_stress_prone": 1,
+#             "N_unwarranted_worry": 1,
+#             "N_low_resilience": 1,
+#         },
+#     }
+
+#     for course_uuid, question_data in question_scores_data.items():
+#         course = Course.objects.filter(course_uuid=course_uuid).first()
+#         if not course:
+#             print(f"⛔ Kurs {course_uuid} nie znaleziony.")
+#             continue
+
+#         for identifier, score in question_data.items():
+#             question = Question.objects.filter(identifier=identifier).first()
+#             if not question:
+#                 print(f"⚠️ Pytanie {identifier} nie znalezione.")
+#                 continue
+
+#             CourseQuestionScore.objects.update_or_create(
+#                 course=course,
+#                 question=question,
+#                 defaults={"score": score}
+#             )
+#     print("✅ Przypisano dopasowania pytań do kierunków.")
 
 # Pobranie kursów z API
 API_URL = 'https://radon.nauka.gov.pl/opendata/polon/courses?resultNumbers=100'
