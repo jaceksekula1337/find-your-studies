@@ -1,19 +1,12 @@
-[phases.setup]
-nixPkgs = ["python311", "openssl", "postgresql", "git"]
-
 [phases.install]
 cmds = [
   "python3.11 -m venv venv",
-  ". venv/bin/activate",
-  "pip install --upgrade pip",
-  "pip install -r requirements.txt"
+  "venv/bin/pip install --upgrade pip",
+  "venv/bin/pip install -r requirements.txt"
 ]
 
 [phases.build]
-cmds = [
-  ". venv/bin/activate",
-  "python manage.py migrate"
-]
+cmds = ["venv/bin/python manage.py migrate"]
 
 [start]
-cmd = ". venv/bin/activate && python manage.py runserver 0.0.0.0:$PORT"
+cmd = "venv/bin/python manage.py runserver 0.0.0.0:$PORT"
