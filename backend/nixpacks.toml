@@ -1,8 +1,11 @@
 [phases.setup]
-nixpkgsArchive = "latest"
+nixPkgs = ["python311", "pipenv", "openssl", "postgresql", "git"]
 
 [phases.install]
 cmds = ["pip install -r requirements.txt"]
 
-[start]
-cmd = "python manage.py runserver 0.0.0.0:8000"
+[phases.build]
+cmds = ["python manage.py migrate"]
+
+[phases.start]
+cmd = "python manage.py runserver 0.0.0.0:$PORT"
