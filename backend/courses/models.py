@@ -16,18 +16,23 @@ class Course(models.Model):
 
 
 class Question(models.Model):
-    identifier = models.CharField(max_length=50, unique=True, null=True, blank=True)  # <- zmiana
+    identifier = models.CharField(max_length=50, unique=True)
     text = models.TextField()
-    category = models.CharField(max_length=20)
+    category = models.CharField(max_length=20)  # openness, conscientiousness, etc.
+    reverse_scored = models.BooleanField(default=False)  # <--- NEW FIELD
 
     def __str__(self):
         return f"{self.identifier} - {self.category}"
 
-
-class CourseQuestionScore(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    score = models.IntegerField()
+class CourseTraitProfile(models.Model):
+    course = models.OneToOneField(Course, on_delete=models.CASCADE, related_name="trait_profile")
+    extraversion = models.FloatField()
+    agreeableness = models.FloatField()
+    conscientiousness = models.FloatField()
+    neuroticism = models.FloatField()
+    openness = models.FloatField()
 
     def __str__(self):
-        return f"{self.course.course_name} - {self.question.identifier} - {self.score}"
+        return f"Profile for {self.course.course_name}"
+
+
