@@ -6,7 +6,7 @@ class UserFeedback(models.Model):
     expected = models.TextField(blank=True)
     change_suggestion = models.TextField(blank=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
-
+    most_accurate = models.TextField(blank=True)
     user_answers = models.JSONField(blank=True, null=True)
     user_profile = models.JSONField(blank=True, null=True)  # <--- NOWE
     recommended_courses = models.JSONField(blank=True, null=True)
