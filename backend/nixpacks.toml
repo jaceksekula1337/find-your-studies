@@ -9,9 +9,10 @@ cmds = [
 ]
 
 [phases.build]
-cmds = [
-  "./venv/bin/python manage.py migrate"
-]
+cmds = [] 
 
 [start]
-cmd = "./venv/bin/gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT"
+cmd = """
+./venv/bin/python manage.py migrate && \
+./venv/bin/gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT
+"""
