@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["python311", "pip", "openssl", "postgresql", "git"]
+nixPkgs = ["python311", "openssl", "postgresql", "git"]
 
 [phases.install]
 cmds = [
