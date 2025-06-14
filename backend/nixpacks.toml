@@ -1,9 +1,12 @@
+[providers]
+python = "3.11"
+
 [phases.setup]
-nixPkgs = ["python3", "pip", "openssl", "postgresql", "git"]
+nixPkgs = ["python311", "pip", "openssl", "postgresql", "git"]
 
 [phases.install]
 cmds = [
-  "python3 -m venv venv",
+  "python3.11 -m venv venv",
   "./venv/bin/pip install --upgrade pip",
   "./venv/bin/pip install -r requirements.txt"
 ]
