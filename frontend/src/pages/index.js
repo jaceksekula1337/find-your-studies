@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import Pagination from "../components/Pagination";
+import QuizApi from "../api/QuizApi";
 
 const questions = [
   {
@@ -261,20 +262,12 @@ export default function Quiz() {
     });
 
     try {
-      const res = await fetch(
-        "http://localhost:8000/matching/course-recommendations/",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ answers }),
-        }
-      );
-      const data = await res.json();
+      const data = await fetchQuizResults(answers);
       setResults(data.recommended_courses);
       setUserProfile(data.user_profile);
       setTraitDescriptions(data.trait_descriptions);
     } catch (err) {
-      console.error("❌ Błąd przy wysyłaniu danych:", err);
+      console.error("❌ Błąd przy pobieraniu wyników quizu:", err);
     }
   };
 
@@ -292,7 +285,7 @@ export default function Quiz() {
 
     try {
       const res = await fetch(
-        "http://localhost:8000/matching/submit-feedback/",
+        "https://find-your-studies-backend-production.up.railway.app/matching/submit-feedback/",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
