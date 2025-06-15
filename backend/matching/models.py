@@ -10,6 +10,7 @@ class UserFeedback(models.Model):
     user_answers = models.JSONField(blank=True, null=True)
     user_profile = models.JSONField(blank=True, null=True)  # <--- NOWE
     recommended_courses = models.JSONField(blank=True, null=True)
+    demographics = models.JSONField(blank=True, null=True)  # <--- nowe pole
 
     def __str__(self):
         return f"Feedback at {self.submitted_at}"

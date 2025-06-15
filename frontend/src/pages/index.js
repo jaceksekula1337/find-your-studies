@@ -33,7 +33,7 @@ const questions = [
   {
     id: 5,
     identifier: "A_sympathize",
-    question: "Współczuję uczuciom innych osób.",
+    question: "Łatwo mi współczuć uczuciom innych osób.",
     category: "agreeableness",
   },
   {
@@ -46,7 +46,7 @@ const questions = [
   {
     id: 7,
     identifier: "A_feel_emotions",
-    question: "Odbieram emocje innych ludzi.",
+    question: "Dobrze wyczuwam emocje innych ludzi.",
     category: "agreeableness",
   },
   {
@@ -182,6 +182,11 @@ export default function Quiz() {
     mostAccurate: "",
     changeSuggestion: "",
   });
+  const [demographics, setDemographics] = useState({
+    age: "",
+    education: "",
+    mindType: "",
+  });
   const [results, setResults] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [transitioning, setTransitioning] = useState(false);
@@ -281,6 +286,7 @@ export default function Quiz() {
       user_answers: formValues,
       user_profile: userProfile,
       recommended_courses: results?.map((r) => r.course_name),
+      demographics,
     };
 
     try {
@@ -529,27 +535,142 @@ export default function Quiz() {
               <h3 className="text-2xl font-semibold text-center text-purple-200 mb-6">
                 📝 Twoja opinia
               </h3>
+              <div
+                className="mb-6 text-center text-sm text-gray-400 max-w-3xl mx-auto"
+                ref={feedbackRef}
+              >
+                <p>
+                  Ta ankieta jest częścią badań naukowych realizowanych w ramach
+                  pracy magisterskiej. Udział jest całkowicie dobrowolny, a
+                  wszystkie dane będą przetwarzane anonimowo i wyłącznie do
+                  celów badawczych.
+                </p>
+              </div>
+              <div className="mb-8 max-w-3xl mx-auto space-y-6 bg-[#2a2a3b] rounded-xl p-6 border border-[#3d3d4f]">
+                <h3 className="text-xl font-semibold text-center text-purple-200 mb-4">
+                  Informacje demograficzne
+                </h3>
 
-              <div className="space-y-6" ref={feedbackRef}>
+                {/* Wiek */}
+                <div>
+                  <label className="block mb-2 font-medium text-gray-100">
+                    Wiek:
+                  </label>
+                  <input
+                    type="number"
+                    min="17"
+                    max="99"
+                    value={demographics.age || ""}
+                    onChange={(e) =>
+                      setDemographics((prev) => ({
+                        ...prev,
+                        age: e.target.value,
+                      }))
+                    }
+                    className="w-full p-2 rounded bg-[#1f1f2e] text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="Podaj swój wiek"
+                  />
+                </div>
+
+                {/* Poziom edukacji */}
+                <div>
+                  <label className="block mb-2 font-medium text-gray-100">
+                    Poziom edukacji:
+                  </label>
+                  <select
+                    value={demographics.educationLevel || ""}
+                    onChange={(e) =>
+                      setDemographics((prev) => ({
+                        ...prev,
+                        educationLevel: e.target.value,
+                      }))
+                    }
+                    className="w-full p-2 rounded bg-[#1f1f2e] text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="" disabled>
+                      Wybierz poziom edukacji
+                    </option>
+                    <option value="secondary">
+                      Średnie (liceum, technikum)
+                    </option>
+                    <option value="post-secondary">
+                      Policealne / zawodowe
+                    </option>
+                    <option value="higher">
+                      Wyższe (studia licencjackie/inżynierskie)
+                    </option>
+                    <option value="master">Studia magisterskie</option>
+                    <option value="other">Inne</option>
+                  </select>
+                </div>
+
+                {/* Typ umysłu */}
+                <div>
+                  <label className="block mb-2 font-medium text-gray-100">
+                    Jakiego typu umysł uważasz, że posiadasz?
+                  </label>
+                  <select
+                    value={demographics.mindType || ""}
+                    onChange={(e) =>
+                      setDemographics((prev) => ({
+                        ...prev,
+                        mindType: e.target.value,
+                      }))
+                    }
+                    className="w-full p-2 rounded bg-[#1f1f2e] text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="" disabled>
+                      Wybierz opcję
+                    </option>
+                    <option value="science">
+                      Ścisły (np. matematyka, technika)
+                    </option>
+                    <option value="humanities">
+                      Humanistyczny (np. języki, sztuka)
+                    </option>
+                    <option value="other">Inny / mieszany</option>
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-6">
                 {feedbackQuestions.map((q) => (
                   <div
                     key={q.id}
                     className="bg-[#2a2a3b] rounded-xl p-4 shadow-sm border border-[#3d3d4f]"
                   >
                     <p className="mb-2">{q.text}</p>
-                    <div className="flex gap-4">
+                    <div className="grid grid-cols-5 gap-4 px-4 py-2 bg-[#242434] rounded-xl text-center">
                       {[1, 2, 3, 4, 5].map((val) => (
-                        <label key={val} className="flex items-center gap-1">
+                        <label
+                          key={`${q.id}-${val}`}
+                          className="flex flex-col items-center text-sm cursor-pointer"
+                        >
                           <input
                             type="radio"
                             name={q.id}
                             value={val}
                             checked={feedbackValues[q.id] == val}
                             onChange={handleFeedbackChange}
+                            className="sr-only"
                           />
-                          {val}
+                          <div
+                            className={`w-10 h-10 flex items-center justify-center rounded-full transition border-2 ${
+                              feedbackValues[q.id] == val
+                                ? "bg-[#9f6ee9] text-white border-[#9f6ee9] shadow-md"
+                                : "bg-[#1e1e2e] text-gray-300 border-gray-600 hover:border-purple-300"
+                            }`}
+                          >
+                            {val}
+                          </div>
                         </label>
                       ))}
+                    </div>
+                    <div className="mt-2 grid grid-cols-5 gap-4 text-xs text-gray-400 px-4 text-center">
+                      <span>Zdecydowanie się nie zgadzam</span>
+                      <span>Nie zgadzam się</span>
+                      <span>Nie mam zdania</span>
+                      <span>Zgadzam się</span>
+                      <span>Zdecydowanie się zgadzam</span>
                     </div>
                   </div>
                 ))}
