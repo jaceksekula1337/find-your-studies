@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const QUIZ_RESULTS_API_URL =
-  "https://find-your-studies-backend-production.up.railway.app/matching/quiz-results/";
+  "https://find-your-studies-backend-production.up.railway.app/matching/course-recommendations/";
 
 // Funkcja do wysyłania odpowiedzi quizu i uzyskania rekomendacji
 export const fetchQuizResults = async (answers) => {

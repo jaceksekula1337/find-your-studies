@@ -28,6 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "find-your-studies-backend-production.up.railway.app",
     "find-your-studies-production.up.railway.app",  # <- Twój frontend
+    "localhost",
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -148,4 +149,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
      "http://localhost:3000",
+    "https://find-your-studies-production.up.railway.app",
  ]
