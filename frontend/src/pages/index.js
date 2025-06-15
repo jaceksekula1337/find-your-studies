@@ -184,7 +184,7 @@ export default function Quiz() {
   });
   const [demographics, setDemographics] = useState({
     age: "",
-    education: "",
+    educationLevel: "",
     mindType: "",
   });
   const [results, setResults] = useState(null);
