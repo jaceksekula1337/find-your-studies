@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import Pagination from "../components/Pagination";
-import QuizApi from "../api/QuizApi";
+import { fetchQuizResults } from "../api/QuizApi";
 
 const questions = [
   {
